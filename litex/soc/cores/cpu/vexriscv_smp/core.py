@@ -33,7 +33,7 @@ class VexRiscvSMP(CPU):
     gcc_triple           = CPU_GCC_TRIPLE_RISCV32
     linker_output_format = "elf32-littleriscv"
     nop                  = "nop"
-    io_regions           = {0x8000_0000: 0x8000_0000} # Origin, Length.
+    io_regions           = {0x9000_0000: 0x7000_0000} # Origin, Length.
 
     # Default parameters.
     cpu_count            = 1
@@ -158,7 +158,7 @@ class VexRiscvSMP(CPU):
         return {
             "rom":      0x0000_0000,
             "sram":     0x1000_0000,
-            "main_ram": 0x4000_0000,
+            "main_ram": 0x8000_0000,
             "csr":      VexRiscvSMP.csr_base,
             "clint":    VexRiscvSMP.clint_base,
             "plic":     VexRiscvSMP.plic_base,
