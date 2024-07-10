@@ -1989,7 +1989,7 @@ class LiteXSoC(SoC):
         self.check_if_exists(f"{name}_mmap")
         spiflash_core = LiteSPI(spiflash_phy, mmap_endianness=self.cpu.endianness, **kwargs)
         self.add_module(name=f"{name}_core", module=spiflash_core)
-        spiflash_region = SoCRegion(origin=self.mem_map.get(name, None), size=module.total_size)
+        spiflash_region = SoCRegion(0x20000000, size=module.total_size)
         self.bus.add_slave(name=name, slave=spiflash_core.bus, region=spiflash_region)
 
         # Constants.
