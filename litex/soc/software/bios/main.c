@@ -102,6 +102,15 @@ __attribute__((__used__)) int main(int i, char **c)
 	i2c_send_init_cmds();
 #endif
 
+/* Modifications for egos-2000 starts here */
+int mvendorid;
+asm volatile ("csrr %0, mvendorid":"=r"(mvendorid));
+printf("[INFO] LiteX + VexRiscv (vendorid: %d)\n\r", mvendorid);
+printf("[INFO] BIOS is loading egos from 0x2040_0000 in ROM to 0x8000_0000 in RAM\n\r");
+/* TODO: memcpy and jump to 0x8000_0000 */
+while(1);
+/* Modifications for egos-2000 ends here */
+
 #ifndef CONFIG_BIOS_NO_PROMPT
 	printf("\n");
 	printf("\e[1m        __   _ __      _  __\e[0m\n");
