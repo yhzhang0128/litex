@@ -57,9 +57,9 @@ static void boot_sequence(void)
 int mvendorid;
 asm volatile ("csrr %0, mvendorid":"=r"(mvendorid));
 printf("[INFO] LiteX + VexRiscv (vendorid: %d)\n\r", mvendorid);
-printf("[INFO] Press 0 to enter BIOS instead of EGOS\n\r");
+printf("[INFO] Press 'b' to enter BIOS instead of EGOS\n\r");
 for(int i = 0; i <20000; i++)
-    if (uart_rxtx_read() == 48) goto BIOS;
+    if (uart_rxtx_read() == 98) goto BIOS;
 
 printf("[INFO] Loading EGOS binary from 0x2040_0000 to 0x8000_0000\n\r");
 unsigned int * src = (unsigned int*) 0x20400000;
