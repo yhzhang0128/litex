@@ -53,6 +53,29 @@
 #ifndef CONFIG_BIOS_NO_BOOT
 static void boot_sequence(void)
 {
+/* Modifications for egos-2000 starts here */
+int mvendorid;
+asm volatile ("csrr %0, mvendorid":"=r"(mvendorid));
+printf("[INFO] LiteX + VexRiscv (vendorid: %d)\n\r", mvendorid);
+printf("[INFO] Press 0 to enter BIOS instead of EGOS\n\r");
+for(int i = 0; i <20000; i++)
+    if (uart_rxtx_read() == 48) goto BIOS;
+
+printf("[INFO] Loading EGOS binary from 0x2040_0000 to 0x8000_0000\n\r");
+unsigned int * src = (unsigned int*) 0x20400000;
+unsigned int * dst = (unsigned int*) 0x80000000;
+/* Note: these stack variables are in [0x10000000, 0x10001800)
+ *       and the executable code is in [0x0, 0x10000]*/
+for (int i = 0; i < 4 * 1024 * 1024 / sizeof(unsigned int); i++)
+    dst[i] = 0;
+for (int i = 0; i < 256 * 1024 / sizeof(unsigned int); i++)
+    dst[i] = src[i];
+void(*egos_entry)() = (void*)0x80000000;
+egos_entry();
+while(1);
+/* Modifications for egos-2000 ends here */
+
+BIOS:
 #ifdef CSR_UART_BASE
 	if (serialboot() == 0)
 		return;
@@ -102,20 +125,6 @@ __attribute__((__used__)) int main(int i, char **c)
 	i2c_send_init_cmds();
 #endif
 
-/* Modifications for egos-2000 starts here */
-int mvendorid;
-asm volatile ("csrr %0, mvendorid":"=r"(mvendorid));
-printf("[INFO] LiteX + VexRiscv (vendorid: %d)\n\r", mvendorid);
-
-for(int i = 0; i <20000; i++)
-    if (uart_rxtx_read() == 48) goto BIOS;
-
-printf("[INFO] BIOS is loading egos from 0x2040_0000 in ROM to 0x8000_0000 in RAM\n\r");
-/* TODO: memcpy and jump to 0x8000_0000 */
-while(1);
-/* Modifications for egos-2000 ends here */
-
-BIOS:
 #ifndef CONFIG_BIOS_NO_PROMPT
 	printf("\n");
 	printf("\e[1m        __   _ __      _  __\e[0m\n");
