@@ -6,6 +6,7 @@
 .global smp_lottery_lock
 .global smp_lottery_args
 .global smp_slave
+.global curr_core
 
 _start:
   j crt_init
@@ -68,6 +69,12 @@ smp_tyranny:
   beqz a0, data_init
 
 smp_slave:
+  .word(0x500F)     // flush dcache
+  la t0, curr_core
+  lw t1, 0(t0)
+  beq a0, t1, main  // wait for curr_core == mhartid
+  j smp_slave
+
   lw a0, smp_lottery_lock
   beqz a0, smp_slave
   fence r, r
@@ -115,6 +122,7 @@ infinit_loop:
 
 //Initialized to avoid having them set to zero by BSS clear
 .bss
+  curr_core:          .word 0
   smp_lottery_target: .word 0
   smp_lottery_args:   .word 0; .word 0; .word 0
   smp_lottery_lock:   .word 0

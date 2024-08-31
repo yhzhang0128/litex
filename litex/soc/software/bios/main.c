@@ -50,6 +50,7 @@
 #include <liblitesdcard/sdcard.h>
 #include <liblitesata/sata.h>
 
+extern int curr_core;
 #ifndef CONFIG_BIOS_NO_BOOT
 static void boot_sequence(void)
 {
@@ -70,8 +71,18 @@ for (int i = 0; i < 4 * 1024 * 1024 / sizeof(unsigned int); i++)
     dst[i] = 0;
 for (int i = 0; i < 256 * 1024 / sizeof(unsigned int); i++)
     dst[i] = src[i];
-void(*egos_entry)() = (void*)0x80000000;
-egos_entry();
+
+int mhartid;
+asm volatile ("csrr %0, mhartid":"=r"(mhartid));
+
+unsigned int mtime_lo = *(unsigned int*)(0xF0010000 + 0xBFF8);
+printf("Core #%d is about to enter egos-2000, mtime_lo=%u\n\r", mhartid, mtime_lo);
+curr_core++;
+flush_cpu_dcache();
+while(1);
+
+//void(*egos_entry)() = (void*)0x80000000;
+//egos_entry();
 while(1);
 /* Modifications for egos-2000 ends here */
 
@@ -104,6 +115,17 @@ BIOS:
 
 __attribute__((__used__)) int main(int i, char **c)
 {
+
+int mhartid;
+asm volatile ("csrr %0, mhartid":"=r"(mhartid));
+
+if (mhartid != 0) {
+  printf("Core #%d is about to enter egos-2000\n\r", mhartid);
+  curr_core++;
+  flush_cpu_dcache();
+  while(1);
+}
+
 #ifndef BIOS_CONSOLE_DISABLE
 	char buffer[CMD_LINE_BUFFER_SIZE];
 	char *params[MAX_PARAM];
@@ -117,6 +139,7 @@ __attribute__((__used__)) int main(int i, char **c)
 	irq_setmask(0);
 	irq_setie(1);
 #endif
+
 #ifdef CSR_UART_BASE
 	uart_init();
 #endif
