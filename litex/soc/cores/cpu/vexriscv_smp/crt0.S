@@ -6,6 +6,7 @@
 .global smp_lottery_lock
 .global smp_lottery_args
 .global smp_slave
+.global boot_finished
 
 _start:
   j crt_init
@@ -59,25 +60,16 @@ trap_entry:
 
 crt_init:
   la sp, _fstack
-  la a0, trap_entry
-  csrw mtvec, a0
-  sw x0, smp_lottery_lock, a1
 
 smp_tyranny:
   csrr a0, mhartid
   beqz a0, data_init
 
 smp_slave:
-  lw a0, smp_lottery_lock
-  beqz a0, smp_slave
-  fence r, r
-
-  .word(0x100F) //i$ flush
-  lw x10, smp_lottery_args
-  lw x11, smp_lottery_args+4
-  lw x12, smp_lottery_args+8
-  lw x13, smp_lottery_target
-  jr x13
+  la t0, boot_finished
+  lw t1, 0(t0)
+  beqz t1, smp_slave
+  j main
 
 data_init:
   la a0, _fdata
@@ -115,6 +107,7 @@ infinit_loop:
 
 //Initialized to avoid having them set to zero by BSS clear
 .bss
+  boot_finished:      .word 0
   smp_lottery_target: .word 0
   smp_lottery_args:   .word 0; .word 0; .word 0
   smp_lottery_lock:   .word 0
