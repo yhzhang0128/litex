@@ -50,7 +50,7 @@
 #include <liblitesdcard/sdcard.h>
 #include <liblitesata/sata.h>
 
-extern int volatile boot_finished;
+extern int volatile boot_core;
 
 #ifndef CONFIG_BIOS_NO_BOOT
 static void boot_sequence(void)
@@ -73,7 +73,8 @@ for (int i = 0; i < 4 * 1024 * 1024 / sizeof(unsigned int); i++)
 for (int i = 0; i < 256 * 1024 / sizeof(unsigned int); i++)
     dst[i] = src[i];
 
-boot_finished++;
+boot_core = 3;
+asm(".word(0x500F)");
 void(*egos_entry)() = (void*)0x80000000;
 egos_entry();
 while(1);
@@ -108,10 +109,6 @@ BIOS:
 
 __attribute__((__used__)) int main(int i, char **c)
 {
-	if (boot_finished) {
-		void(*egos_entry)() = (void*)0x80000000;
-		egos_entry();
-	}
 #ifndef BIOS_CONSOLE_DISABLE
 	char buffer[CMD_LINE_BUFFER_SIZE];
 	char *params[MAX_PARAM];

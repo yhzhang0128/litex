@@ -6,12 +6,12 @@
 .global smp_lottery_lock
 .global smp_lottery_args
 .global smp_slave
-.global boot_finished
+.global boot_core
 
 _start:
+  li t0, 0x88
+  csrc mstatus, t0
   j crt_init
-  nop
-  nop
   nop
   nop
   nop
@@ -66,10 +66,16 @@ smp_tyranny:
   beqz a0, data_init
 
 smp_slave:
-  la t0, boot_finished
+  .word(0x500F)
+  la t0, boot_core
   lw t1, 0(t0)
-  beqz t1, smp_slave
-  j main
+  bne t1, a0, smp_slave
+  addi t1, t1, -1  /* Make sure that boot_core is 0 when all 4 cores have booted, */
+                   /* so core#1,2,3 will still wait here after pressing RESET button. */
+  sw t1, 0(t0)
+  .word(0x500F)
+  li t0, 0x80000000
+  jr t0
 
 data_init:
   la a0, _fdata
@@ -107,7 +113,7 @@ infinit_loop:
 
 //Initialized to avoid having them set to zero by BSS clear
 .bss
-  boot_finished:      .word 0
+  boot_core:          .word 0
   smp_lottery_target: .word 0
   smp_lottery_args:   .word 0; .word 0; .word 0
   smp_lottery_lock:   .word 0
