@@ -54,11 +54,12 @@
 extern int volatile boot_core;
 
 void core_start(void) {
-    printf("[INFO] Core#%d exits BIOS and jumps to 0x8000_0000\n\r", boot_core%4);
+    //printf("[INFO] Core#%d exits BIOS and jumps to 0x8000_0000\n\r", boot_core%4);
     boot_core--;
+    asm(".word(0x100F)\nnop\nnop\nnop\nnop\nnop\n");
     asm(".word(0x500F)");
-    void(*egos_entry)() = (void*)0x80000000;
-    egos_entry();
+    asm("lui a5,0x80000");
+    asm("jalr a5");
     while(1);
 }
 

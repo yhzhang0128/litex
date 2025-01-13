@@ -11,7 +11,8 @@
 _start:
   li t0, 0x88
   csrc mstatus, t0
-  csrw mtvec, bios_exception
+  la t0, bios_exception
+  csrw mtvec, t0
   la sp, _fstack
   csrr a0, mhartid
   beqz a0, data_init
