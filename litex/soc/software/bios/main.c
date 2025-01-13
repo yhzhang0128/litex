@@ -57,7 +57,7 @@ void core_start(void) {
     //printf("[INFO] Core#%d exits BIOS and jumps to 0x8000_0000\n\r", boot_core%4);
     boot_core--;
     asm(".word(0x100F)\nnop\nnop\nnop\nnop\nnop\n");
-    asm(".word(0x500F)");
+    asm(".word(0x500F)\nnop\nnop\nnop\nnop\nnop\n");
     asm("lui a5,0x80000");
     asm("jalr a5");
     while(1);
