@@ -50,12 +50,28 @@
 #include <liblitesdcard/sdcard.h>
 #include <liblitesata/sata.h>
 
+/* Modifications for egos-2000 starts here */
 extern int volatile boot_core;
+
+void core_start(void) {
+    printf("[INFO] Core#%d exits BIOS and jumps to 0x8000_0000\n\r", boot_core%4);
+    boot_core--;
+    asm(".word(0x500F)");
+    void(*egos_entry)() = (void*)0x80000000;
+    egos_entry();
+    while(1);
+}
+
+void bios_exception(void) {
+    int mcause;
+    asm("csrr %0, mcause" : "=r"(mcause));
+    printf("[FATAL] BIOS meets exception when boot_core=%d and mcause=%x\n\r", boot_core, mcause);
+    while(1);
+}
 
 #ifndef CONFIG_BIOS_NO_BOOT
 static void boot_sequence(void)
 {
-/* Modifications for egos-2000 starts here */
 int mvendorid;
 asm volatile ("csrr %0, mvendorid":"=r"(mvendorid));
 printf("[INFO] LiteX + VexRiscv (vendorid: %d)\n\r", mvendorid);
@@ -72,12 +88,8 @@ for (int i = 0; i < 4 * 1024 * 1024 / sizeof(unsigned int); i++)
     dst[i] = 0;
 for (int i = 0; i < 256 * 1024 / sizeof(unsigned int); i++)
     dst[i] = src[i];
-
-boot_core = 3;
-asm(".word(0x500F)");
-void(*egos_entry)() = (void*)0x80000000;
-egos_entry();
-while(1);
+boot_core = 4;
+core_start();
 /* Modifications for egos-2000 ends here */
 
 BIOS:
