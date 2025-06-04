@@ -630,6 +630,8 @@ class SoCLocHandler(LiteXModule):
 
     # Add ------------------------------------------------------------------------------------------
     def add(self, name, n=None, use_loc_if_exists=False):
+        if name=="spisdcard":
+            n=17 # Make sure that SPISDCARD_BASE is at 0xF0008800
         allocated = False
         if not (use_loc_if_exists and name in self.locs.keys()):
             if name in self.locs.keys():
