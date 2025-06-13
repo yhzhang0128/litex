@@ -2369,7 +2369,8 @@ class LiteXSoC(SoC):
         base = self.mem_map.get(name, None)
         if base is None:
             self.bus.add_region(name, SoCRegion(
-                origin = 0x40c00000,
+                #origin = 0x40c00000,
+                origin = 0x81000000,
                 size   = 0x800000,
                 linker = True)
             )
