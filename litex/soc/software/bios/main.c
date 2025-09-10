@@ -50,6 +50,9 @@
 #include <liblitesdcard/sdcard.h>
 #include <liblitesata/sata.h>
 
+#include <libfatfs/diskio.h>
+#include <liblitesdcard/spisdcard.h>
+
 /* Modifications for egos-2000 starts here */
 extern int volatile boot_core;
 
@@ -80,7 +83,18 @@ printf("[INFO] Press 'b' to enter BIOS instead of EGOS\n\r");
 for(int i = 0; i <20000; i++)
     if (uart_rxtx_read() == 98) goto BIOS;
 
-printf("[INFO] Loading EGOS binary from 0x2040_0000 to 0x8000_0000\n\r");
+uint8_t res=spisdcard_init();
+printf("[INFO] SD card initialization returns status=%u\n\r", res);
+
+printf("[INFO] Reading 256 blocks (128 KB) to 0x8000_0000\n\r");
+fatfs_set_ops_spisdcard();
+extern DISKOPS *FfDiskOps;
+FfDiskOps->disk_read(0, (0x80000000), 0, 256);
+printf("[INFO] Jumping to 0x8000_0000\n\r");
+asm("lui a5,0x80000");
+asm("jalr a5");
+while(1);
+
 unsigned int * src = (unsigned int*) 0x20400000;
 unsigned int * dst = (unsigned int*) 0x80000000;
 /* Note: these stack variables are in [0x10000000, 0x10001800)

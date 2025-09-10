@@ -2370,8 +2370,8 @@ class LiteXSoC(SoC):
         if base is None:
             self.bus.add_region(name, SoCRegion(
                 #origin = 0x40c00000,
-                origin = 0x81000000,
-                size   = 0x800000,
+                origin = 0x80600000,
+                size   = 0x200000,
                 linker = True)
             )
             base = self.bus.regions[name].origin
