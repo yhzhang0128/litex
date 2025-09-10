@@ -50,6 +50,9 @@
 #include <liblitesdcard/sdcard.h>
 #include <liblitesata/sata.h>
 
+#include <libfatfs/diskio.h>
+#include <liblitesdcard/spisdcard.h>
+
 /* Modifications for egos-2000 starts here */
 extern int volatile boot_core;
 
@@ -79,6 +82,23 @@ printf("[INFO] LiteX + VexRiscv (vendorid: %d)\n\r", mvendorid);
 printf("[INFO] Press 'b' to enter BIOS instead of EGOS\n\r");
 for(int i = 0; i <20000; i++)
     if (uart_rxtx_read() == 98) goto BIOS;
+
+if ( strcmp(CONFIG_PLATFORM_NAME, "sipeed_tang_nano_20k") == 0 ) {
+    printf("[INFO] Initializing SD card\n\r");
+    uint8_t res=spisdcard_init();
+    if (res != 1) {
+	    printf("[FATAL] Please insert SD card and reset the board");
+	    while(1);
+    }
+    printf("[INFO] Reading 256 blocks (128 KB) to 0x8000_0000\n\r");
+    fatfs_set_ops_spisdcard();
+    extern DISKOPS *FfDiskOps;
+    FfDiskOps->disk_read(0, (0x80000000), 0, 256);
+    printf("[INFO] Jumping to 0x8000_0000\n\r");
+    asm("lui a5,0x80000");
+    asm("jalr a5");
+    while(1);
+}
 
 printf("[INFO] Loading EGOS binary from 0x2040_0000 to 0x8000_0000\n\r");
 unsigned int * src = (unsigned int*) 0x20400000;
