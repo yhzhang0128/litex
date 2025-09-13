@@ -2370,8 +2370,8 @@ class LiteXSoC(SoC):
         if base is None:
             self.bus.add_region(name, SoCRegion(
                 #origin = 0x40c00000,
-                origin = 0x81000000,
-                size   = 0x800000,
+                origin = 0x80600000,
+                size   = 0x200000,
                 linker = True)
             )
             base = self.bus.regions[name].origin
@@ -2382,6 +2382,7 @@ class LiteXSoC(SoC):
             vres   = vres,
             base   = base,
             format = format,
+            fifo_depth = 8192,
             clock_domain          = clock_domain,
             clock_faster_than_sys = vtg.video_timings["pix_clk"] >= self.sys_clk_freq,
         )
