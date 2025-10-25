@@ -95,6 +95,8 @@ if ( strcmp(CONFIG_PLATFORM_NAME, "sipeed_tang_nano_20k") == 0 ) {
     extern DISKOPS *FfDiskOps;
     FfDiskOps->disk_read(0, (0x80000000), 0, 256);
     printf("[INFO] Jumping to 0x8000_0000\n\r");
+    asm(".word(0x100F)\nnop\nnop\nnop\nnop\nnop\n");
+    asm(".word(0x500F)\nnop\nnop\nnop\nnop\nnop\n");
     asm("lui a5,0x80000");
     asm("jalr a5");
     while(1);
