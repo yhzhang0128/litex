@@ -102,6 +102,10 @@ if ( strcmp(CONFIG_PLATFORM_NAME, "sipeed_tang_nano_20k") == 0 ) {
     while(1);
 }
 
+//printf("[INFO] Initializing ESP32 UART\n\r");
+esp32uart_ev_pending_write(esp32uart_ev_pending_read());
+esp32uart_ev_enable_write(UART_EV_TX | UART_EV_RX);
+
 printf("[INFO] Loading EGOS binary from 0x2040_0000 to 0x8000_0000\n\r");
 unsigned int * src = (unsigned int*) 0x20400000;
 unsigned int * dst = (unsigned int*) 0x80000000;
